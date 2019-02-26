@@ -93,10 +93,8 @@ public class Model {
         Dataset<Row> predictions = model.transform(test);
         Dataset<Row> r = model.recommendForAllUsers(10);
         System.out.println(" r show");
-         // r.show();
+      
          r.coalesce(1).write().json("output2.json");
-      /*  DataFrameWriter<Row> write;
-        write = r.write(dataset2);*/
         // evaluation crieteria for model
         RegressionEvaluator evaluator = new RegressionEvaluator()
                 .setMetricName("rmse")
