@@ -94,7 +94,7 @@ public class Model {
         Dataset<Row> r = model.recommendForAllUsers(10);
         System.out.println(" r show");
          // r.show();
-         r.write().json("output1.json");
+         r.coalesce(1).write().json("output2.json");
       /*  DataFrameWriter<Row> write;
         write = r.write(dataset2);*/
         // evaluation crieteria for model
