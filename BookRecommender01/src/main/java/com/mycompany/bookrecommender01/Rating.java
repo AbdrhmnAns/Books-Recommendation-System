@@ -10,33 +10,33 @@ package com.mycompany.bookrecommender01;
  * @author AbdrhmnAns
  */
 public class Rating {
-    private String userId;
-    private String ISBN;
-    private String rate;
+    private int userId;
+    private int ISBN;
+    private int rate;
    
     
 
-    public String getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
-    public String getISBN() {
+    public int getISBN() {
         return ISBN;
     }
 
-    public void setISBN(String ISBN) {
+    public void setISBN(int ISBN) {
         this.ISBN = ISBN;
     }
 
-    public String getRate() {
+    public int getRate() {
         return rate;
     }
 
-    public void setRate(String rate) {
+    public void setRate(int rate) {
         this.rate = rate;
     }
 

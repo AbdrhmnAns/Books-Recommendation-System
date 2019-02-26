@@ -14,6 +14,7 @@ import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.ml.feature.StringIndexerModel;
 import org.apache.spark.ml.recommendation.ALS;
 import org.apache.spark.ml.recommendation.ALSModel;
+import org.apache.spark.sql.DataFrameWriter;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -33,16 +34,20 @@ public class Model {
 
         Dataset<Row> dataset = session
                 .read().option("header", "true")
-                .csv("books.csv");
+                .csv("ratings.csv");
         dataset.show();
+        
+     /*     Dataset<Row> dataset2 = session
+                .read().option("header", "true")
+                .csv("output.csv");*/
         //dataset.show();
         //data.write().json("D:\\jsondata");
         ////Dataset<Row> mydata = session.read().json("D:\\jsondata\\m.json");
         ////mydata.show();
         //preprocessing
+     
         JavaRDD<Rating> javaRDD = dataset.toJavaRDD().map(new Function<Row, Rating>() {
             @Override
-
             public Rating call(Row row) throws Exception {
                 //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 //   System.out.println("here " + row.toString());
@@ -52,12 +57,15 @@ public class Model {
 
                 // System.out.println("userid " + fields[2]);
                 String userId = fields[0];
-                String ISBN = fields[5];
-                String rate = fields[12];
+                int nuserId = Integer.parseInt(userId.replaceAll("[\\[\\]]",""));
+                String ISBN = fields[1];
+                int nISBN = Integer.parseInt(ISBN.replaceAll("[\\[\\]]",""));
+                String rate = fields[2];
+                int Ratee = Integer.parseInt(rate.replaceAll("[\\[\\]]",""));
                 Rating r = new Rating();
-                r.setUserId(userId);
-                r.setRate(rate);
-                r.setISBN(ISBN);
+                r.setUserId(nuserId);
+                r.setRate(Ratee);
+                r.setISBN(nISBN);
                 return r;
             }
         });
@@ -65,8 +73,8 @@ public class Model {
         Dataset<Row> ratingDataset = session.createDataFrame(javaRDD, Rating.class);
         //  ratingDataset.write().json("E://cvbb");
         ratingDataset.show();
-
-        StringIndexerModel userIdLI = new StringIndexer().setInputCol("userId").fit(ratingDataset).setOutputCol("ouserId");
+//dframe = dframe.withColumn("c_number", dframe.col("c_a").cast("decimal(38,0)"));
+      /*  StringIndexerModel userIdLI = new StringIndexer().setInputCol("userId").fit(ratingDataset).setOutputCol("ouserId");
         StringIndexerModel ISBNLI = new StringIndexer().setInputCol("ISBN").fit(ratingDataset).setOutputCol("oISBN");
         StringIndexerModel rateLI = new StringIndexer().setInputCol("rate").fit(ratingDataset).setOutputCol("orate");
         Pipeline p1 = new Pipeline().setStages(new PipelineStage[]{userIdLI, ISBNLI, rateLI});
@@ -75,26 +83,26 @@ public class Model {
         System.out.println("heeeeeeeeeeeeeeeeeeeere");
         
         data.show();
-        
-        Dataset<Row>[] splits = data.randomSplit(new double[]{0.8, 0.2});
+        */
+        Dataset<Row>[] splits = ratingDataset.randomSplit(new double[]{0.8, 0.2});
         Dataset<Row> training = splits[0];
         Dataset<Row> test = splits[1];
-        ALS als = new ALS().setMaxIter(5).setRegParam(0.01).setUserCol("ouserId").setItemCol("oISBN").setRatingCol("orate");
+        ALS als = new ALS().setMaxIter(10).setRegParam(0.01).setUserCol("userId").setItemCol("ISBN").setRatingCol("rate");
         ALSModel model = als.fit(training);
         model.setColdStartStrategy("drop");
         Dataset<Row> predictions = model.transform(test);
-        Dataset<Row> r = model.recommendForAllItems(2);
+        Dataset<Row> r = model.recommendForAllUsers(10);
         System.out.println(" r show");
-        r.show();
-        
+         // r.show();
+         r.write().json("output1.json");
+      /*  DataFrameWriter<Row> write;
+        write = r.write(dataset2);*/
         // evaluation crieteria for model
         RegressionEvaluator evaluator = new RegressionEvaluator()
                 .setMetricName("rmse")
-                .setLabelCol("orate")
+                .setLabelCol("rate")
                 .setPredictionCol("prediction");
         Double rmse = evaluator.evaluate(predictions);
         System.out.println("Root-mean-square error = " + rmse);
     }
 }
-
-////                .csv("C:\\Users\\AbdrhmnAns\\Documents\\dataset1.csv")
