@@ -94,7 +94,7 @@ public class Model {
         Dataset<Row> r = model.recommendForAllUsers(10);
         System.out.println(" r show");
       
-         r.coalesce(1).write().json("output2.json");
+        r.coalesce(1).write().json("output2.json");
         // evaluation crieteria for model
         RegressionEvaluator evaluator = new RegressionEvaluator()
                 .setMetricName("rmse")
@@ -103,4 +103,4 @@ public class Model {
         Double rmse = evaluator.evaluate(predictions);
         System.out.println("Root-mean-square error = " + rmse);
     }
-}
+}   
